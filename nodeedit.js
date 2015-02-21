@@ -248,10 +248,10 @@ function Scene()
                 {
                     this.nodeUnderCursor.setHighlight(false);
                 }
-                if( node )
+                this.nodeUnderCursor = node;
+                if( this.nodeUnderCursor )
                 {
-                    node.setHighlight(true);
-                    this.nodeUnderCursor = node;
+                    this.nodeUnderCursor.setHighlight(true);
                 }
             }
         }
