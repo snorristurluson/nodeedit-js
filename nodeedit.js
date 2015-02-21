@@ -1,6 +1,7 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
+ARROW_SIZE = 6;
 function NodeRender(ctx)
 {
     ctx.fillStyle = "white";
@@ -40,7 +41,7 @@ function NodeRender(ctx)
             isHorizontal = true;
             fromX = this.x + this.width;
             fromY = this.y + halfHeight;
-            toX = other.x;
+            toX = other.x - ARROW_SIZE;
             toY = other.y + other.height / 2;
         }
         else if(this.x > other.x + other.width)
@@ -48,7 +49,7 @@ function NodeRender(ctx)
             isHorizontal = true;
             fromX = this.x;
             fromY = this.y + halfHeight;
-            toX = other.x + other.width;
+            toX = other.x + other.width + ARROW_SIZE;
             toY = other.y + other.height / 2;
         }
         else if(this.y + this.height < other.y)
@@ -57,7 +58,7 @@ function NodeRender(ctx)
             fromX = this.x + halfWidth;
             fromY = this.y + this.height;
             toX = other.x + other.width / 2;
-            toY = other.y;
+            toY = other.y - ARROW_SIZE;
         }
         else if(this.y > other.y + other.height)
         {
@@ -65,7 +66,7 @@ function NodeRender(ctx)
             fromX = this.x + halfWidth;
             fromY = this.y;
             toX = other.x + other.width / 2;
-            toY = other.y + other.height;
+            toY = other.y + other.height + ARROW_SIZE;
         }
         else
         {
@@ -102,13 +103,48 @@ function NodeRender(ctx)
             ctx.quadraticCurveTo(
                 c1x, c1y,
                 midX, midY
-            )
+            );
             ctx.quadraticCurveTo(
                 c2x, c2y,
                 toX, toY
-            )
+            );
             // ctx.lineTo(midX, midY);
             ctx.stroke();
+
+            ctx.beginPath();
+            if(isHorizontal)
+            {
+                if(toX + ARROW_SIZE > fromX)
+                {
+                    ctx.moveTo(toX + ARROW_SIZE, toY);
+                    ctx.lineTo(toX, toY - ARROW_SIZE / 2);
+                    ctx.lineTo(toX, toY + ARROW_SIZE / 2);
+                }
+                else
+                {
+                    ctx.moveTo(toX - ARROW_SIZE, toY);
+                    ctx.lineTo(toX, toY - ARROW_SIZE / 2);
+                    ctx.lineTo(toX, toY + ARROW_SIZE / 2);
+                }
+            }
+            else
+            {
+                if(toY + ARROW_SIZE > fromY)
+                {
+                    ctx.moveTo(toX, toY + ARROW_SIZE);
+                    ctx.lineTo(toX - ARROW_SIZE / 2, toY);
+                    ctx.lineTo(toX + ARROW_SIZE / 2, toY);
+                }
+                else
+                {
+                    ctx.moveTo(toX, toY - ARROW_SIZE);
+                    ctx.lineTo(toX - ARROW_SIZE / 2, toY);
+                    ctx.lineTo(toX + ARROW_SIZE / 2, toY);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fill();
         }
     }
 }
@@ -250,6 +286,7 @@ function SceneOnMouseUp(x, y)
 
 function ScenePick(x, y)
 {
+    var i;
     for( i = 0; i < this.nodes.length; ++i )
     {
         var node = this.nodes[i];
