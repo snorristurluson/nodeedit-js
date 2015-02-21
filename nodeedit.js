@@ -23,13 +23,21 @@ function NodeRender(ctx)
     var halfHeight = this.height / 2;
     ctx.fillText(this.name, this.x + halfWidth, this.y + halfHeight);
 
+    ctx.lineWidth = 2;
+
     var i;
     for(i = 0; i < this.connectedTo.length; ++i)
     {
         var other = this.connectedTo[i];
-        var fromX, fromY, toX, toY;
+        var fromX, fromY, toX, toY, midX, midY;
+        var c1x, c1y, c2x, c2y;
+
+        var isHorizontal;
+        var isOverlap = false;
+
         if(this.x + this.width < other.x)
         {
+            isHorizontal = true;
             fromX = this.x + this.width;
             fromY = this.y + halfHeight;
             toX = other.x;
@@ -37,6 +45,7 @@ function NodeRender(ctx)
         }
         else if(this.x > other.x + other.width)
         {
+            isHorizontal = true;
             fromX = this.x;
             fromY = this.y + halfHeight;
             toX = other.x + other.width;
@@ -44,6 +53,7 @@ function NodeRender(ctx)
         }
         else if(this.y + this.height < other.y)
         {
+            isHorizontal = false;
             fromX = this.x + halfWidth;
             fromY = this.y + this.height;
             toX = other.x + other.width / 2;
@@ -51,6 +61,7 @@ function NodeRender(ctx)
         }
         else if(this.y > other.y + other.height)
         {
+            isHorizontal = false;
             fromX = this.x + halfWidth;
             fromY = this.y;
             toX = other.x + other.width / 2;
@@ -58,16 +69,47 @@ function NodeRender(ctx)
         }
         else
         {
+            isOverlap = true;
             fromX = this.x + halfWidth;
             fromY = this.y + halfHeight;
             toX = other.x + other.width / 2;
             toY = other.y + other.height / 2;
         }
-        ctx.beginPath();
-        ctx.moveTo(fromX, fromY);
-        ctx.lineWidth = 2;
-        ctx.lineTo(toX, toY);
-        ctx.stroke();
+
+        midX = fromX + (toX - fromX) / 2;
+        midY = fromY + (toY - fromY) / 2;
+
+        if( isHorizontal )
+        {
+            c1x = midX;
+            c1y = fromY;
+            c2x = midX;
+            c2y = toY;
+        }
+        else
+        {
+            c1x = fromX;
+            c1y = midY;
+            c2x = toX;
+            c2y = midY;
+        }
+
+        if(!isOverlap)
+        {
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+
+            ctx.quadraticCurveTo(
+                c1x, c1y,
+                midX, midY
+            )
+            ctx.quadraticCurveTo(
+                c2x, c2y,
+                toX, toY
+            )
+            // ctx.lineTo(midX, midY);
+            ctx.stroke();
+        }
     }
 }
 
@@ -264,7 +306,7 @@ var first = new Node("First", 20, 20);
 var second = new Node("Second", 60, 200);
 var third = new Node("Third", 150, 140);
 first.connectTo(second);
-first.connectTo(third);
+// first.connectTo(third);
 second.connectTo(third);
 scene.addNode(first);
 scene.addNode(second);
