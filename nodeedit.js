@@ -22,6 +22,53 @@ function NodeRender(ctx)
     var halfWidth = this.width / 2;
     var halfHeight = this.height / 2;
     ctx.fillText(this.name, this.x + halfWidth, this.y + halfHeight);
+
+    var i;
+    for(i = 0; i < this.connectedTo.length; ++i)
+    {
+        var other = this.connectedTo[i];
+        var fromX, fromY, toX, toY;
+        if(this.x + this.width < other.x)
+        {
+            fromX = this.x + this.width;
+            fromY = this.y + halfHeight;
+            toX = other.x;
+            toY = other.y + other.height / 2;
+        }
+        else if(this.x > other.x + other.width)
+        {
+            fromX = this.x;
+            fromY = this.y + halfHeight;
+            toX = other.x + other.width;
+            toY = other.y + other.height / 2;
+        }
+        else if(this.y + this.height < other.y)
+        {
+            fromX = this.x + halfWidth;
+            fromY = this.y + this.height;
+            toX = other.x + other.width / 2;
+            toY = other.y;
+        }
+        else if(this.y > other.y + other.height)
+        {
+            fromX = this.x + halfWidth;
+            fromY = this.y;
+            toX = other.x + other.width / 2;
+            toY = other.y + other.height;
+        }
+        else
+        {
+            fromX = this.x + halfWidth;
+            fromY = this.y + halfHeight;
+            toX = other.x + other.width / 2;
+            toY = other.y + other.height / 2;
+        }
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineWidth = 2;
+        ctx.lineTo(toX, toY);
+        ctx.stroke();
+    }
 }
 
 function NodeSetHighlight(val)
@@ -51,6 +98,11 @@ function NodeIsInside(x, y)
     return true;
 }
 
+function NodeConnectTo(node)
+{
+    this.connectedTo.push(node);
+}
+
 function Node(name, x, y)
 {
     this.name = name;
@@ -59,10 +111,12 @@ function Node(name, x, y)
     this.width = 100;
     this.height = 30;
     this.isHighlighted = false;
+    this.connectedTo = [];
 
     this.render = NodeRender;
     this.isInside = NodeIsInside;
-    this.setHighlight = NodeSetHighlight
+    this.setHighlight = NodeSetHighlight;
+    this.connectTo = NodeConnectTo;
 }
 
 function SceneAddNode(node)
@@ -206,7 +260,13 @@ canvas.addEventListener("mousedown", OnMouseDown);
 canvas.addEventListener("mousemove", OnMouseMove);
 canvas.addEventListener("mouseup", OnMouseUp);
 
-scene.addNode(new Node("First", 20, 20));
-scene.addNode(new Node("Second", 60, 20));
-scene.addNode(new Node("Third", 50, 40));
+var first = new Node("First", 20, 20);
+var second = new Node("Second", 60, 200);
+var third = new Node("Third", 150, 140);
+first.connectTo(second);
+first.connectTo(third);
+second.connectTo(third);
+scene.addNode(first);
+scene.addNode(second);
+scene.addNode(third);
 scene.render(ctx);
